@@ -11,6 +11,7 @@ declare let google: any;
 
 export class GooglePlaceDirective implements AfterViewInit {
     @Input('options') options: Options;
+    @Input('selector') selector: string | null = null;
     @Output() onAddressChange: EventEmitter<Address> = new EventEmitter();
     private autocomplete: any;
     private eventListener: any;
@@ -34,7 +35,14 @@ export class GooglePlaceDirective implements AfterViewInit {
         if (!this.isGoogleLibExists())
             throw new Error("Google maps library can not be found");
 
-        this.autocomplete = new google.maps.places.Autocomplete(this.el.nativeElement, this.options);
+        let inputEl: any;
+        if (this.selector) {
+            inputEl = this.el.nativeElement.querySelector(this.selector);
+        } else {
+            inputEl = this.el.nativeElement;
+        }
+
+        this.autocomplete = new google.maps.places.Autocomplete(inputEl, this.options);
 
         if (!this.autocomplete)
             throw new Error("Autocomplete is not initialized");
@@ -45,10 +53,10 @@ export class GooglePlaceDirective implements AfterViewInit {
             });
         }
 
-        this.el.nativeElement.addEventListener('keydown', (event: KeyboardEvent) => {
+        inputEl.addEventListener('keydown', (event: KeyboardEvent) => {
             let key = event.key.toLowerCase();
 
-            if (key == 'enter' && event.target === this.el.nativeElement) {
+            if (key == 'enter' && event.target === inputEl) {
                 event.preventDefault();
                 event.stopPropagation();
             }
